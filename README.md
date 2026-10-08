@@ -62,9 +62,20 @@ rm -f k.pem c.pem s.p12 cs.cnf
 ```
 The first launch after switching identity shows one Keychain prompt: choose **Always Allow**.
 
-> **Hardware-bound key mode is not available from `build.sh` yet.** It needs the data-protection Keychain, which macOS
-> only allows for apps with a provisioning profile and `keychain-access-groups` entitlement (an Xcode project). Plain
-> command-line builds get `-34018` and Securely falls back to the "Touch ID gated" mode. See [SECURITY.md](SECURITY.md).
+### Hardware-bound key (Xcode build)
+macOS only allows the biometry-protected data-protection Keychain for apps carrying a provisioning profile and a
+`keychain-access-groups` entitlement, so this mode needs the Xcode build instead of `build.sh`:
+```bash
+brew install tuist
+# 1. In Project.swift set DEVELOPMENT_TEAM to your Team ID (Xcode → Settings → Accounts → your team)
+# 2. In Project.swift and Securely.entitlements replace com.lalomorales22.securely with your own bundle ID
+./build-xcode.sh
+open Securely.app
+```
+With this build, the master key becomes a Keychain item protected by `.biometryCurrentSet`: macOS itself requires your
+fingerprint to release it, and adding or removing a finger invalidates it. The lock screen shows `Key: hardware-bound`
+when it is active, and `Key: Touch ID gated` when Securely had to fall back. A vault created in one mode is not
+migrated to the other; delete `~/Library/Application Support/Securely/vault.enc` to start fresh (this destroys the vault).
 
 ## Connect another agent (MCP)
 Enable **Agents** in the app toolbar, then:

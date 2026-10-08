@@ -21,3 +21,11 @@ index.enc
 agent.sock
 .env
 .env.*
+
+# Xcode / Tuist
+.xbuild/
+Derived/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+Securely.xcodeproj/
+Securely.xcworkspace/

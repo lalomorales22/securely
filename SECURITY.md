@@ -22,7 +22,7 @@ Does **not** protect against:
 
 | Mode | When | Strength |
 |---|---|---|
-| `hardware` | App built with a provisioning profile and `keychain-access-groups` entitlement (needs an Xcode project; **not supported by `build.sh` yet**) | Master key is a biometry-bound Keychain item (`.biometryCurrentSet`); Touch ID is enforced by the OS. The code path exists but has never succeeded: command-line builds fail with `-34018`. |
+| `hardware` | App built with a provisioning profile and `keychain-access-groups` entitlement (build with `./build-xcode.sh`; plain `build.sh` builds fall back to `gated`) | Master key is a biometry-bound Keychain item (`.biometryCurrentSet`); Touch ID is enforced by the OS. Command-line `build.sh` builds fail with `-34018` and fall back. |
 | `gated` | Ad-hoc or self-signed builds | Key in the login Keychain, released after an app-level Touch ID check. Weaker. |
 
 Touch ID templates never leave the Secure Enclave; Securely never sees or stores fingerprint data.
@@ -60,7 +60,7 @@ Adding or removing a finger in System Settings invalidates `hardware`-mode keys 
 - A prompt-injected local model could still add notes, which are then indexed. It cannot read secrets without a fingerprint.
 - The bridge spawns a thread per connection with no rate limit (local denial of service only).
 - If the Keychain item is lost (or in `hardware` mode, a finger is added/removed), the vault cannot be decrypted. There is no recovery key yet.
-- Hardware-bound mode has not been verified: it needs an Xcode-managed provisioning profile.
+- The Xcode build is signed and carries the right entitlements, but the author has not yet confirmed end-to-end that macOS enforces the fingerprint on key release. Treat `hardware` mode as unverified until you see `Key: hardware-bound` on your own machine.
 
 ## Reporting a vulnerability
 
