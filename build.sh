@@ -19,7 +19,12 @@ cat > $APP/Contents/Info.plist <<PL
 <key>NSRequiresAquaSystemAppearance</key><false/>
 </dict></plist>
 PL
-ID="Securely Local Signing"
-if security find-identity -p codesigning | grep -q "$ID"; then SIGN="$ID"; else SIGN="-"; echo "warning: no stable identity, using ad-hoc (Keychain will re-prompt)"; fi
-codesign --force --deep --sign "$SIGN" $APP
+# Signing identity: $SIGN_ID, else an Apple Development cert, else a local "Securely Local Signing" cert, else ad-hoc.
+IDS=$(security find-identity -p codesigning)
+if [ -n "${SIGN_ID:-}" ]; then SIGN="$SIGN_ID"
+elif echo "$IDS" | grep -q "Apple Development"; then SIGN=$(echo "$IDS" | grep -o '"Apple Development[^"]*"' | head -1 | tr -d '"')
+elif echo "$IDS" | grep -q "Securely Local Signing"; then SIGN="Securely Local Signing"
+else SIGN="-"; echo "warning: no stable identity, using ad-hoc (Keychain will re-prompt after every rebuild)"; fi
+echo "Signing with: $SIGN"
+codesign --force --deep --sign "$SIGN" $APP || { echo "codesign failed; retrying with the local identity or ad-hoc"; codesign --force --deep --sign "Securely Local Signing" $APP 2>/dev/null || codesign --force --deep --sign - $APP; }
 echo "Built $APP"
