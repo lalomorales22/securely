@@ -1,0 +1,23 @@
+# build output
+.build/
+Securely.app/
+*.app
+DerivedData/
+.swiftpm/
+*.xcodeproj/xcuserdata/
+
+# macOS
+.DS_Store
+
+# never commit signing material or user data
+*.p12
+*.pfx
+*.pem
+*.key
+*.cer
+*.mobileprovision
+vault.enc
+index.enc
+agent.sock
+.env
+.env.*
